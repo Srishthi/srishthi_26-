@@ -1,0 +1,98 @@
+#importing packages
+import pandas as pd
+import numpy as np
+import  matplotlib.pyplot as plt
+
+#Function to find cost & gradient 
+def cost_function(X,w,bias,y):
+    n = X.shape[0]
+    z=net_input(X,w,bias)
+    y_pred=softmax(z)
+    y_actual=one_hot_encode(y)
+    cost = (-1/n)*np.sum(y_actual*np.log(y_pred))
+    gradient = (-1/n)*np.dot(X.T,(y_actual-y_pred))
+    return cost,gradient
+
+
+#One hot encoding for classification of classes
+def one_hot_encode(y):
+    y_enc=pd.get_dummies(y)
+    y_enc=np.array(np.reshape(y_enc,newshape=(4,3)))
+    return y_enc
+
+#For finding equation of z=X.w+b
+def net_input(X,w,b):
+    z=np.dot(X,w)+b
+    return z
+
+#Activation Function 
+def softmax(z):
+   y_probs =(np.exp(z.T)/(np.sum(np.exp(z),axis=1))).T
+   return y_probs
+
+#Finding labels of the class
+def class_labels(y_pred):
+    return y_pred.argmax(axis=1)
+
+#Attribute training matrix
+X = np.array([[1.2,2.3],
+              [1.4,2.5],
+              [-1.2,-2.3],
+              [-3.4,-3.5]])
+
+#Attribute Testing Matrix 
+X_test = np.array([[1.4,2.6],
+              [1.0,2.1],
+              [-1.4,-2.6],
+              [-1.0,-2.1]])
+
+#Class List
+y = np.array([0,1,2,2])
+
+#Weight vector
+weight = np.array([[0.1,0.2,0.3],
+                   [0.1,0.2,0.3]])
+
+#By default bias 
+bias = np.array([0.1,0.1,0.2])
+
+#Function Calling
+z=net_input(X,weight,bias)
+y_probs = softmax(z)
+y_pred=class_labels(y_probs)
+#print(y_pred)
+#print(np.sum(y_probs,axis=1))
+
+#Finding Gradient Descent 
+def gradient_descent():
+   global X,bias,weight,y
+   iterations = 10000
+   learning_rate = 0.09
+   cost_lst = []
+   i_lst = []
+   for i in range(iterations):
+       cost,gradient=cost_function(X,weight,bias,y)
+       weight = weight - (learning_rate*gradient)
+       cost_lst.append(cost)
+       i_lst.append(i)
+
+   plt.xlabel("Iterations")
+   plt.ylabel("Cost")
+   plt.grid()
+   plt.plot(i_lst,cost_lst)
+   plt.show()
+
+
+gradient_descent()
+print(weight)
+
+def accuracy():
+    global X_test,weight,bias,y
+    z = net_input(X_test, weight, bias)
+    y_prob = softmax(z)
+    updated_data = class_labels(y_prob)
+    print(updated_data)
+    acc=sum(y==updated_data)/len(y)
+    print(acc)
+
+accuracy()
